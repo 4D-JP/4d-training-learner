@@ -401,7 +401,8 @@ http://doc.4d.com/4dv15r/help/command/ja/page1019.html
 テーブルの調整
 
 * 最長文字列の調査
-
+* フィールドタイプの変更
+ 
 ```
 ALL RECORDS([位置参照情報Ｂ])
 
@@ -427,7 +428,14 @@ $maxLength:=Length($f->)
 
 🔷[ORDER BY FORMULA](http://doc.4d.com/4dv15r/help/command/ja/page300.html)
 
-* フィールドタイプの変更
+---
+ 
+ リレートテーブルの作成
+ 
+ <img width="684" alt="db" src="https://cloud.githubusercontent.com/assets/10509075/18460552/6bd8ae76-79ad-11e6-8687-6c0f728d9d3e.png">
+
+---
+
 * 検索用に「住所」フィールドを追加
 * 結合文字列を保存
  
@@ -488,8 +496,6 @@ QUERY([位置参照情報Ｂ];[都道府県]都道府県名="東京都")
 📜[デザインリファレンス > データベースストラクチャーの作成 > リレーションのタイプ](http://doc.4d.com/4dv15r/Types-of-relations.300-2964243.ja.html)
 
 📜[デザインリファレンス > データベースストラクチャーの作成 > リレーションプロパティ](http://doc.4d.com/4dv15r/Relation-properties.300-2964252.ja.html)
-
-<img width="684" alt="db" src="https://cloud.githubusercontent.com/assets/10509075/18460552/6bd8ae76-79ad-11e6-8687-6c0f728d9d3e.png">
 
 ---
 
