@@ -434,11 +434,109 @@ $maxLength:=Length($f->)
  
  <img width="684" alt="db" src="https://cloud.githubusercontent.com/assets/10509075/18460552/6bd8ae76-79ad-11e6-8687-6c0f728d9d3e.png">
 
+```
+$tableName:="都道府県"
+
+ARRAY TEXT($fieldNames;2)
+ARRAY TEXT($fieldTypes;2)
+
+$fieldNames{1}:="都道府県コード"
+$fieldTypes{1}:="VARCHAR(2)"
+
+$fieldNames{2}:="都道府県名"
+$fieldTypes{2}:="VARCHAR(4)"
+
+$sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
+For ($i;1;Size of array($fieldNames))
+If ($i#1)
+$sql:=$sql+",\r"
+End if 
+$sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
+End for 
+$sql:=$sql+"\r);"
+
+C_LONGINT($tableId)
+
+Begin SQL
+EXECUTE IMMEDIATE :$sql;
+SELECT TABLE_ID 
+FROM _USER_TABLES
+WHERE TABLE_NAME LIKE :$tableName
+LIMIT 1
+INTO :$tableId;
+End SQL
+```
+
+```
+$tableName:="市区町村"
+
+ARRAY TEXT($fieldNames;3)
+ARRAY TEXT($fieldTypes;3)
+
+$fieldNames{1}:="市区町村コード"
+$fieldTypes{1}:="VARCHAR(5)"
+
+$fieldNames{2}:="市区町村名"
+$fieldTypes{2}:="VARCHAR(10)"
+
+$fieldNames{3}:="都道府県コード"
+$fieldTypes{3}:="VARCHAR(2)"
+
+$sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
+For ($i;1;Size of array($fieldNames))
+If ($i#1)
+$sql:=$sql+",\r"
+End if 
+$sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
+End for 
+$sql:=$sql+"\r);"
+
+C_LONGINT($tableId)
+
+Begin SQL
+EXECUTE IMMEDIATE :$sql;
+SELECT TABLE_ID 
+FROM _USER_TABLES
+WHERE TABLE_NAME LIKE :$tableName
+LIMIT 1
+INTO :$tableId;
+End SQL
+```
+
+```
+ALL RECORDS([位置参照情報Ｂ])
+
+For ($i;1;Records in selection([位置参照情報Ｂ]))
+
+QUERY([都道府県];[都道府県]都道府県コード=[位置参照情報Ｂ]都道府県コード)
+
+If (Not(Is record loaded([都道府県])))
+CREATE RECORD([都道府県])
+[都道府県]都道府県コード:=[位置参照情報Ｂ]都道府県コード
+[都道府県]都道府県名:=[位置参照情報Ｂ]都道府県名
+SAVE RECORD([都道府県])
+End if 
+
+QUERY([市区町村];[市区町村]市区町村コード=[位置参照情報Ｂ]市区町村コード)
+
+If (Not(Is record loaded([市区町村])))
+CREATE RECORD([市区町村])
+[市区町村]都道府県コード:=[位置参照情報Ｂ]都道府県コード
+[市区町村]市区町村コード:=[位置参照情報Ｂ]市区町村コード
+[市区町村]市区町村名:=[位置参照情報Ｂ]市区町村名
+SAVE RECORD([市区町村])
+End if 
+
+NEXT RECORD([位置参照情報Ｂ])
+End for 
+```
+
 ---
 
 * 検索用に「住所」フィールドを追加
 * 結合文字列を保存
- 
+* 重複レコードの削除
+* 
 ```
 C_BOOLEAN($1)
 
@@ -458,8 +556,6 @@ End if
 ```
 
 🔷[APPLY TO SELECTION](http://doc.4d.com/4dv15r/help/command/ja/page70.html)
-
-* 重複レコードの削除
 
 ---
 
