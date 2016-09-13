@@ -452,8 +452,6 @@ End if
 🔷[APPLY TO SELECTION](http://doc.4d.com/4dv15r/help/command/ja/page70.html)
 
 * 重複レコードの削除
- 
-⚠️ほんとうに削除するためにはデータファイルの圧縮が必要
 
 ---
 
