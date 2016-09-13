@@ -349,6 +349,7 @@ Case of
 
 $source:=OBJECT Get data source(*;OBJECT Get name(Object with focus))
 
+If (Not(Nil($source)))
 If (Not(Is a variable($source)))
 $table:=Table(Table($source))
 If (Not(Nil($table)))
@@ -356,6 +357,7 @@ If (Is record loaded($table->))
 If (Modified record($table->))
 SAVE RECORD($table->)
 REDRAW(OBJECT Get pointer(Object named;"Contact.List")->)
+End if 
 End if 
 End if 
 End if 
