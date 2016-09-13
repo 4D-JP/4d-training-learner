@@ -32,6 +32,7 @@
 * ヘッダー > 列名をフィールド名にする
 * テーブル名: Contact
 * エンコーディング: Windows-31J
+* 生年月日フィールドを日付型に設定する
 
 テストデータ作成ツール: http://yamagata.int21h.jp/tool/testdata/
 
