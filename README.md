@@ -411,6 +411,20 @@ ORDER BY FORMULA([位置参照情報Ｂ];Length($f->);<)
 $maxLength:=Length($f->)
 ```
 
+```
+都道府県コード (2)
+都道府県名 (4)
+市区町村コード (5)
+市区町村名 (10)
+大字町丁目コード (12)
+大字町丁目名 (18)
+緯度 REAL
+経度 REAL
+原典資料コード] INT16
+大字・字・丁目区分コード INT16
+住所 TEXT
+```
+
 🔷[ORDER BY FORMULA](http://doc.4d.com/4dv15r/help/command/ja/page300.html)
 
 * フィールドタイプの変更
