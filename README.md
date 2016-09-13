@@ -150,6 +150,8 @@ Choose([Contact]性別="男";0x003333FF;0x00FF3333)
 
 🔷[Choose](http://doc.4d.com/4dv15r/help/command/ja/page955.html)
 
+🔷[Form event](http://doc.4d.com/4dv15r/help/command/ja/page388.html)
+
 ---
 
 検索エリア
@@ -595,21 +597,26 @@ QUERY([位置参照情報Ｂ];[都道府県]都道府県名="東京都")
 
 ---
 
-エクスターナルデータベース
+###エクスターナルデータベース
 
 🌀通常の方法で作成したデータベースが使用できる
-
-⚠️パスワードを設定してはいけない
 
 🔶[USE DATABASE](http://doc.4d.com/4dv15r/USE-DATABASE.300-2977361.ja.html)
 
 🔶[CREATE DATABASE](http://doc.4d.com/4dv15r/CREATE-DATABASE.300-2977366.ja.html)
 
+⚠️パスワードを設定してはいけない
+
 ---
 
-ウィジェット
+❓ウィジェット
 
-⚠️フォームのOn Data Changeイベントが有効でなければならない
-⚠️ページ2以降に配置することはできない
+📜[デザインリファレンス > 4Dコンポーネントの開発とインストール > コンポーネントとホストデータベースの相互作用](http://doc.4d.com/4dv15r/Interaction-between-components-and-host-databases.300-2964175.ja.html)
+
+📜[デザインリファレンス > サブフォームとウィジェット > ページサブフォーム](http://doc.4d.com/4dv15r/Page-subforms.300-2964164.ja.html)
+
+⚠️フォームの``On Data Change``イベントが有効でなければならない
+
+⚠️ページ2以降にウィジェットを配置することはできない
 
 ---
