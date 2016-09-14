@@ -444,7 +444,7 @@ $maxLength:=Length($f->)
  
  リレートテーブルの作成
  
- <img width="684" alt="db" src="https://cloud.githubusercontent.com/assets/10509075/18460552/6bd8ae76-79ad-11e6-8687-6c0f728d9d3e.png">
+<img width="816" alt="structure-2" src="https://cloud.githubusercontent.com/assets/10509075/18499586/45c3e312-7a7b-11e6-8b48-fc78434eae59.png">
 
 ```
 $tableName:="都道府県"
@@ -482,17 +482,14 @@ End SQL
 ```
 $tableName:="市区町村"
 
-ARRAY TEXT($fieldNames;3)
-ARRAY TEXT($fieldTypes;3)
+ARRAY TEXT($fieldNames;2)
+ARRAY TEXT($fieldTypes;2)
 
 $fieldNames{1}:="市区町村コード"
 $fieldTypes{1}:="VARCHAR(5)"
 
 $fieldNames{2}:="市区町村名"
 $fieldTypes{2}:="VARCHAR(10)"
-
-$fieldNames{3}:="都道府県コード"
-$fieldTypes{3}:="VARCHAR(2)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
@@ -516,31 +513,36 @@ End SQL
 ```
 
 ```
-ALL RECORDS([位置参照情報Ｂ])
+$tableName:="大字町丁目"
 
-For ($i;1;Records in selection([位置参照情報Ｂ]))
+ARRAY TEXT($fieldNames;2)
+ARRAY TEXT($fieldTypes;2)
 
-QUERY([都道府県];[都道府県]都道府県コード=[位置参照情報Ｂ]都道府県コード)
+$fieldNames{1}:="大字町丁目コード"
+$fieldTypes{1}:="VARCHAR(12)"
 
-If (Not(Is record loaded([都道府県])))
-CREATE RECORD([都道府県])
-[都道府県]都道府県コード:=[位置参照情報Ｂ]都道府県コード
-[都道府県]都道府県名:=[位置参照情報Ｂ]都道府県名
-SAVE RECORD([都道府県])
+$fieldNames{2}:="大字町丁目名"
+$fieldTypes{2}:="VARCHAR(18)"
+
+$sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
+For ($i;1;Size of array($fieldNames))
+If ($i#1)
+$sql:=$sql+",\r"
 End if 
-
-QUERY([市区町村];[市区町村]市区町村コード=[位置参照情報Ｂ]市区町村コード)
-
-If (Not(Is record loaded([市区町村])))
-CREATE RECORD([市区町村])
-[市区町村]都道府県コード:=[位置参照情報Ｂ]都道府県コード
-[市区町村]市区町村コード:=[位置参照情報Ｂ]市区町村コード
-[市区町村]市区町村名:=[位置参照情報Ｂ]市区町村名
-SAVE RECORD([市区町村])
-End if 
-
-NEXT RECORD([位置参照情報Ｂ])
+$sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
 End for 
+$sql:=$sql+"\r);"
+
+C_LONGINT($tableId)
+
+Begin SQL
+EXECUTE IMMEDIATE :$sql;
+SELECT TABLE_ID 
+FROM _USER_TABLES
+WHERE TABLE_NAME LIKE :$tableName
+LIMIT 1
+INTO :$tableId;
+End SQL
 ```
 
 ---
