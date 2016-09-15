@@ -409,53 +409,32 @@ SQL
 
 テーブルの調整
 
-* 最長文字列の調査
-* フィールドタイプの変更
+* フィールドタイプの変更（テキストから数値に）
 
-🌀テキスト型はそのままで良い
+🌀文字数は入力制御のためだけなので設定しなくても良い
 
-```
-ALL RECORDS([位置参照情報Ｂ])
-
-$f:=->[位置参照情報Ｂ]大字・字・丁目区分コード
-ORDER BY FORMULA([位置参照情報Ｂ];Length($f->);<)
-
-$maxLength:=Length($f->)
-```
-
-```
-都道府県コード (2)
-都道府県名 (4)
-市区町村コード (5)
-市区町村名 (10)
-大字町丁目コード (12)
-大字町丁目名 (18)
-緯度 REAL
-経度 REAL
-原典資料コード] INT16
-大字・字・丁目区分コード INT16
-住所 TEXT
-```
-
-🔷[ORDER BY FORMULA](http://doc.4d.com/4dv15r/help/command/ja/page300.html)
+⚠️実際にレコードを更新するまでデータは変わらない
 
 ---
  
  リレートテーブルの作成
  
-<img width="816" alt="structure-2" src="https://cloud.githubusercontent.com/assets/10509075/18499586/45c3e312-7a7b-11e6-8b48-fc78434eae59.png">
+<img width="840" alt="v2" src="https://cloud.githubusercontent.com/assets/10509075/18534442/1c1e384a-7b26-11e6-82cc-d12e99d895c7.png">
 
 ```
 $tableName:="都道府県"
 
-ARRAY TEXT($fieldNames;2)
-ARRAY TEXT($fieldTypes;2)
+ARRAY TEXT($fieldNames;3)
+ARRAY TEXT($fieldTypes;3)
 
-$fieldNames{1}:="都道府県コード"
-$fieldTypes{1}:="VARCHAR(2)"
+$fieldNames{1}:="ID"
+$fieldTypes{1}:="INT32 PRIMARY KEY"
 
-$fieldNames{2}:="都道府県名"
-$fieldTypes{2}:="VARCHAR(4)"
+$fieldNames{2}:="都道府県コード"
+$fieldTypes{2}:="VARCHAR(2)"
+
+$fieldNames{3}:="都道府県名"
+$fieldTypes{3}:="VARCHAR(4)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
@@ -475,20 +454,32 @@ FROM _USER_TABLES
 WHERE TABLE_NAME LIKE :$tableName
 LIMIT 1
 INTO :$tableId;
+End SQL
+
+$sql:="ALTER TABLE ["+$tableName+"] MODIFY ["+$fieldNames{1}+"] ENABLE AUTO_INCREMENT"
+
+Begin SQL
+EXECUTE IMMEDIATE :$sql;
 End SQL
 ```
 
 ```
 $tableName:="市区町村"
 
-ARRAY TEXT($fieldNames;2)
-ARRAY TEXT($fieldTypes;2)
+ARRAY TEXT($fieldNames;4)
+ARRAY TEXT($fieldTypes;4)
 
-$fieldNames{1}:="市区町村コード"
-$fieldTypes{1}:="VARCHAR(5)"
+$fieldNames{1}:="ID"
+$fieldTypes{1}:="INT32 PRIMARY KEY"
 
-$fieldNames{2}:="市区町村名"
-$fieldTypes{2}:="VARCHAR(10)"
+$fieldNames{2}:="都道府県"
+$fieldTypes{2}:="INT32"
+
+$fieldNames{3}:="市区町村コード"
+$fieldTypes{3}:="VARCHAR(5)"
+
+$fieldNames{4}:="市区町村名"
+$fieldTypes{4}:="VARCHAR(10)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
@@ -508,20 +499,33 @@ FROM _USER_TABLES
 WHERE TABLE_NAME LIKE :$tableName
 LIMIT 1
 INTO :$tableId;
+End SQL
+
+$sql:="ALTER TABLE ["+$tableName+"] MODIFY ["+$fieldNames{1}+"] ENABLE AUTO_INCREMENT;\r"
+$sql:=$sql+"CREATE INDEX ["+$tableName+"."+$fieldNames{3}+"] ON ["+$tableName+"] (["+$fieldNames{3}+"]);"
+
+Begin SQL
+EXECUTE IMMEDIATE :$sql;
 End SQL
 ```
 
 ```
 $tableName:="大字町丁目"
 
-ARRAY TEXT($fieldNames;2)
-ARRAY TEXT($fieldTypes;2)
+ARRAY TEXT($fieldNames;4)
+ARRAY TEXT($fieldTypes;4)
 
-$fieldNames{1}:="大字町丁目コード"
-$fieldTypes{1}:="VARCHAR(12)"
+$fieldNames{1}:="ID"
+$fieldTypes{1}:="INT32 PRIMARY KEY"
 
-$fieldNames{2}:="大字町丁目名"
-$fieldTypes{2}:="VARCHAR(18)"
+$fieldNames{2}:="市区町村"
+$fieldTypes{2}:="INT32"
+
+$fieldNames{3}:="大字町丁目コード"
+$fieldTypes{3}:="VARCHAR(12)"
+
+$fieldNames{4}:="大字町丁目名"
+$fieldTypes{4}:="VARCHAR(18)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
@@ -542,12 +546,18 @@ WHERE TABLE_NAME LIKE :$tableName
 LIMIT 1
 INTO :$tableId;
 End SQL
+
+$sql:="ALTER TABLE ["+$tableName+"] MODIFY ["+$fieldNames{1}+"] ENABLE AUTO_INCREMENT;\r"
+$sql:=$sql+"CREATE INDEX ["+$tableName+"."+$fieldNames{3}+"] ON ["+$tableName+"] (["+$fieldNames{3}+"]);"
+
+Begin SQL
+EXECUTE IMMEDIATE :$sql;
+End SQL
 ```
 
 ---
 
 * 検索用に「住所」フィールドを追加
-* 結合文字列を保存
  
 ```
 ALL RECORDS([位置参照情報Ｂ])
