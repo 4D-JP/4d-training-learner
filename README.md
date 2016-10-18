@@ -173,18 +173,18 @@ Choose([Contact]性別="男";0x003333FF;0x00FF3333)
 $event:=Form event
 
 Case of 
-: ($event=On Load)
+ : ($event=On Load)
 
-ALL RECORDS([Contact])
+  ALL RECORDS([Contact])
 
-: ($event=On Data Change)
+ : ($event=On Data Change)
 
-$q:=Replace string(Self->;"@";"")
+  $q:=Replace string(Self->;"@";"")
 
-$criteria:="@"+$q+"@"
+  $criteria:="@"+$q+"@"
 
-QUERY([Contact];[Contact]名前=$criteria;*)
-QUERY([Contact]; | ;[Contact]名前フリガナ=$criteria)
+  QUERY([Contact];[Contact]名前=$criteria;*)
+  QUERY([Contact]; | ;[Contact]名前フリガナ=$criteria)
 
 End case 
 
@@ -235,10 +235,80 @@ ALL RECORDS([Contact])
 : ($event=On Data Change)
 
 $q:=Self->
-$q:=Replace string($q;"@";"")
+
+  //スペースを除去
 $q:=Replace string($q;" ";"")
+$isEmail:=Match regex("[^@]+@[^@]+";$q)
+  //$isEmail:=Match regex("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";$q)
+  //http://qiita.com/sakuro/items/1eaa307609ceaaf51123
+
+If ($isEmail)
+$q:=Replace string($q;"@";"＠";*)
+Else 
+$q:=Replace string($q;"@";"")
+end if
+
+$isKana:=Match regex("[[:Hiragana:][:Katakana:]]+";$q)
+$isNull:=(Length($q)=0)
+$isPhone:=Match regex("[0-9]+-[0-9]+-[0-9]+";$q)
+$isPost:=Match regex("[0-9]{3}-[0-9]{4}";$q)
 
 DESCRIBE QUERY EXECUTION(True)
+
+case of
+  //全件
+: ($isNull)
+
+QUERY([Contact];[Contact]名前="@")
+
+  //電話番号
+: ($isPhone)
+
+QUERY([Contact];[Contact]電話番号=$q;*)
+QUERY([Contact]; | ;[Contact]携帯番号=$q)
+
+  //メール
+: ($isEmail)
+
+QUERY([Contact];[Contact]メール=$q)
+
+  //郵便番号
+: ($isPost)
+
+QUERY([Contact];[Contact]郵便番号=$q)
+
+: ($isKana)
+
+Case of 
+: (Length($q)>2)
+
+  //ふつうの条件
+$criteria0:="@"+$q+"@"
+
+  //ゆるめの条件
+$criteria1:=Substring($q;1;2)+"@"+Substring($q;Length($q))+"@"
+$criteria2:="@"+Substring($q;1;1)+"@"+Substring($q;Length($q)-1)
+
+QUERY BY FORMULA([Contact];\
+([Contact]名前フリガナ=$criteria1 | \
+[Contact]名前フリガナ=$criteria2 )& \
+Replace string([Contact]名前フリガナ;" ";"")=$criteria0)
+
+Else 
+
+$criteria0:="@"+$q+"@"
+
+QUERY([Contact];[Contact]名前フリガナ=$criteria0)
+
+End case 
+
+Else 
+
+Case of 
+: (Length($q)>1)
+
+  //ふつうの条件
+$criteria0:="@"+$q+"@"
 
 GET TEXT KEYWORDS($q;$words)
 
@@ -248,43 +318,17 @@ For ($i;1;Size of array($words))
 $criteria1:=$criteria1+$words{$i}+"@"
 End for 
 
-  //ふつうの条件
-$criteria2:="@"+$q+"@"
-
-Case of 
-  //全件
-: (Length($q)=0)
-QUERY([Contact];[Contact]名前="@")
-
-  //電話番号
-: (Match regex("[0-9-]+";$q))
-QUERY([Contact];[Contact]電話番号=$q;*)
-QUERY([Contact]; | ;[Contact]携帯番号=$q)
-
-//メール
-: (Match regex("[^@]+@[^@]+";Self->))
-
-$criteria:=Replace string(Self->;"@";"＠";*)
-QUERY([Contact];[Contact]メール=$criteria)
-
-  //ふつうの条件のみ
-: (Size of array($words)=1)
-$criteria:="@"+$q+"@"
-If (Match regex("[[:Hiragana:][:Katakana:]]+";$q))
-QUERY([Contact];[Contact]名前フリガナ=$criteria)
-Else 
-QUERY([Contact];[Contact]名前=$criteria)
-End if 
+QUERY BY FORMULA([Contact];\
+[Contact]名前=$criteria1 & \
+Replace string([Contact]名前;" ";"")=$criteria0)
 
 Else 
-  //ゆるめの条件＋ふつうの条件
-If (Match regex("[[:Hiragana:][:Katakana:]]+";$q))
-QUERY BY FORMULA([Contact];[Contact]名前フリガナ=$criteria1 & \
-Replace string([Contact]名前フリガナ;" ";"")=$criteria2)
-Else 
-QUERY BY FORMULA([Contact];[Contact]名前=$criteria1 & \
-Replace string([Contact]名前;" ";"")=$criteria2)
-End if 
+
+$criteria0:="@"+$q+"@"
+
+QUERY([Contact];[Contact]名前=$criteria0)
+
+End case 
 
 End case 
 
