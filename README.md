@@ -290,9 +290,9 @@ Case of
     $criteria2:="@"+Substring($q;1;1)+"@"+Substring($q;Length($q)-1)
 
     QUERY BY FORMULA([Contact];\
-    ([Contact]名前フリガナ=$criteria1 | \
-    [Contact]名前フリガナ=$criteria2 )& \
-    Replace string([Contact]名前フリガナ;" ";"")=$criteria0)
+     (([Contact]名前フリガナ=$criteria1) | \
+     ([Contact]名前フリガナ=$criteria2)) & \
+     (Replace string([Contact]名前フリガナ;" ";"")=$criteria0))
 
    Else 
 
@@ -319,8 +319,8 @@ Case of
     End for 
 
     QUERY BY FORMULA([Contact];\
-    [Contact]名前=$criteria1 & \
-    Replace string([Contact]名前;" ";"")=$criteria0)
+     ([Contact]名前=$criteria1) & \
+     (Replace string([Contact]名前;" ";"")=$criteria0))
 
    Else 
 
@@ -369,6 +369,9 @@ $event:=Form event
 
 Case of 
 : ($event=On Selection Change)
+
+ C_LONGINT($col;$row;$number)
+ C_TEXT($name;$set)
 
  LISTBOX GET CELL POSITION(*;OBJECT Get name(Object current);$col;$row)
  LISTBOX GET TABLE SOURCE(*;OBJECT Get name(Object current);$number;$name;$set)
