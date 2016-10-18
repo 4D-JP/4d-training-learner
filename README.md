@@ -234,107 +234,107 @@ Case of
 
  : ($event=On Data Change)
 
- $q:=Self->
+  $q:=Self->
 
-   //スペースを除去
- $q:=Replace string($q;" ";"")
- $isEmail:=Match regex("[^@]+@[^@]+";$q)
-   //$isEmail:=Match regex("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";$q)
-   //http://qiita.com/sakuro/items/1eaa307609ceaaf51123
+    //スペースを除去
+  $q:=Replace string($q;" ";"")
+  $isEmail:=Match regex("[^@]+@[^@]+";$q)
+    //$isEmail:=Match regex("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";$q)
+    //http://qiita.com/sakuro/items/1eaa307609ceaaf51123
 
- If ($isEmail)
-  $q:=Replace string($q;"@";"＠";*)
- Else 
-  $q:=Replace string($q;"@";"")
- end if
+  If ($isEmail)
+   $q:=Replace string($q;"@";"＠";*)
+  Else 
+   $q:=Replace string($q;"@";"")
+  end if
 
- $isKana:=Match regex("[[:Hiragana:][:Katakana:]]+";$q)
- $isNull:=(Length($q)=0)
- $isPhone:=Match regex("[0-9]+-[0-9]+-[0-9]+";$q)
- $isPost:=Match regex("[0-9]{3}-[0-9]{4}";$q)
+  $isKana:=Match regex("[[:Hiragana:][:Katakana:]]+";$q)
+  $isNull:=(Length($q)=0)
+  $isPhone:=Match regex("[0-9]+-[0-9]+-[0-9]+";$q)
+  $isPost:=Match regex("[0-9]{3}-[0-9]{4}";$q)
 
- DESCRIBE QUERY EXECUTION(True)
+  DESCRIBE QUERY EXECUTION(True)
 
- case of
-   //全件
- : ($isNull)
+  case of
+    //全件
+  : ($isNull)
 
-  QUERY([Contact];[Contact]名前="@")
+   QUERY([Contact];[Contact]名前="@")
 
-   //電話番号
- : ($isPhone)
+    //電話番号
+  : ($isPhone)
 
-  QUERY([Contact];[Contact]電話番号=$q;*)
-  QUERY([Contact]; | ;[Contact]携帯番号=$q)
+   QUERY([Contact];[Contact]電話番号=$q;*)
+   QUERY([Contact]; | ;[Contact]携帯番号=$q)
 
-   //メール
- : ($isEmail)
+    //メール
+  : ($isEmail)
 
-  QUERY([Contact];[Contact]メール=$q)
+   QUERY([Contact];[Contact]メール=$q)
 
-   //郵便番号
- : ($isPost)
+    //郵便番号
+  : ($isPost)
 
-  QUERY([Contact];[Contact]郵便番号=$q)
+   QUERY([Contact];[Contact]郵便番号=$q)
 
- : ($isKana)
+  : ($isKana)
 
-  Case of 
-  : (Length($q)>2)
+   Case of 
+   : (Length($q)>2)
 
-     //ふつうの条件
-   $criteria0:="@"+$q+"@"
+      //ふつうの条件
+    $criteria0:="@"+$q+"@"
 
-     //ゆるめの条件
-   $criteria1:=Substring($q;1;2)+"@"+Substring($q;Length($q))+"@"
-   $criteria2:="@"+Substring($q;1;1)+"@"+Substring($q;Length($q)-1)
+      //ゆるめの条件
+    $criteria1:=Substring($q;1;2)+"@"+Substring($q;Length($q))+"@"
+    $criteria2:="@"+Substring($q;1;1)+"@"+Substring($q;Length($q)-1)
 
-   QUERY BY FORMULA([Contact];\
-   ([Contact]名前フリガナ=$criteria1 | \
-   [Contact]名前フリガナ=$criteria2 )& \
-   Replace string([Contact]名前フリガナ;" ";"")=$criteria0)
+    QUERY BY FORMULA([Contact];\
+    ([Contact]名前フリガナ=$criteria1 | \
+    [Contact]名前フリガナ=$criteria2 )& \
+    Replace string([Contact]名前フリガナ;" ";"")=$criteria0)
+
+   Else 
+
+    $criteria0:="@"+$q+"@"
+
+    QUERY([Contact];[Contact]名前フリガナ=$criteria0)
+
+   End case 
 
   Else 
 
-   $criteria0:="@"+$q+"@"
+   Case of 
+   : (Length($q)>1)
 
-   QUERY([Contact];[Contact]名前フリガナ=$criteria0)
+      //ふつうの条件
+    $criteria0:="@"+$q+"@"
 
-  End case 
+    GET TEXT KEYWORDS($q;$words)
 
- Else 
+      //ゆるめの条件
+    $criteria1:="@"
+    For ($i;1;Size of array($words))
+      $criteria1:=$criteria1+$words{$i}+"@"
+    End for 
 
-  Case of 
-  : (Length($q)>1)
+    QUERY BY FORMULA([Contact];\
+    [Contact]名前=$criteria1 & \
+    Replace string([Contact]名前;" ";"")=$criteria0)
 
-     //ふつうの条件
-   $criteria0:="@"+$q+"@"
+   Else 
 
-   GET TEXT KEYWORDS($q;$words)
+    $criteria0:="@"+$q+"@"
 
-     //ゆるめの条件
-   $criteria1:="@"
-   For ($i;1;Size of array($words))
-     $criteria1:=$criteria1+$words{$i}+"@"
-   End for 
+    QUERY([Contact];[Contact]名前=$criteria0)
 
-   QUERY BY FORMULA([Contact];\
-   [Contact]名前=$criteria1 & \
-   Replace string([Contact]名前;" ";"")=$criteria0)
-
-  Else 
-
-   $criteria0:="@"+$q+"@"
-
-   QUERY([Contact];[Contact]名前=$criteria0)
+   End case 
 
   End case 
 
- End case 
+ DESCRIBE QUERY EXECUTION(False)
 
-DESCRIBE QUERY EXECUTION(False)
-
-OBJECT Get pointer(Object named;"Message.QueryPath")->:=Get last query path(Description in text format)
+ OBJECT Get pointer(Object named;"Message.QueryPath")->:=Get last query path(Description in text format)
 
 End case 
 
