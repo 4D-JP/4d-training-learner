@@ -228,109 +228,109 @@ OBJECT Get pointer(Object named;"Message.QueryPath")->:=Get last query path(Desc
 $event:=Form event
 
 Case of 
-: ($event=On Load)
+ : ($event=On Load)
 
-ALL RECORDS([Contact])
+  ALL RECORDS([Contact])
 
-: ($event=On Data Change)
+ : ($event=On Data Change)
 
-$q:=Self->
+ $q:=Self->
 
-  //スペースを除去
-$q:=Replace string($q;" ";"")
-$isEmail:=Match regex("[^@]+@[^@]+";$q)
-  //$isEmail:=Match regex("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";$q)
-  //http://qiita.com/sakuro/items/1eaa307609ceaaf51123
+   //スペースを除去
+ $q:=Replace string($q;" ";"")
+ $isEmail:=Match regex("[^@]+@[^@]+";$q)
+   //$isEmail:=Match regex("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";$q)
+   //http://qiita.com/sakuro/items/1eaa307609ceaaf51123
 
-If ($isEmail)
-$q:=Replace string($q;"@";"＠";*)
-Else 
-$q:=Replace string($q;"@";"")
-end if
+ If ($isEmail)
+  $q:=Replace string($q;"@";"＠";*)
+ Else 
+  $q:=Replace string($q;"@";"")
+ end if
 
-$isKana:=Match regex("[[:Hiragana:][:Katakana:]]+";$q)
-$isNull:=(Length($q)=0)
-$isPhone:=Match regex("[0-9]+-[0-9]+-[0-9]+";$q)
-$isPost:=Match regex("[0-9]{3}-[0-9]{4}";$q)
+ $isKana:=Match regex("[[:Hiragana:][:Katakana:]]+";$q)
+ $isNull:=(Length($q)=0)
+ $isPhone:=Match regex("[0-9]+-[0-9]+-[0-9]+";$q)
+ $isPost:=Match regex("[0-9]{3}-[0-9]{4}";$q)
 
-DESCRIBE QUERY EXECUTION(True)
+ DESCRIBE QUERY EXECUTION(True)
 
-case of
-  //全件
-: ($isNull)
+ case of
+   //全件
+ : ($isNull)
 
-QUERY([Contact];[Contact]名前="@")
+  QUERY([Contact];[Contact]名前="@")
 
-  //電話番号
-: ($isPhone)
+   //電話番号
+ : ($isPhone)
 
-QUERY([Contact];[Contact]電話番号=$q;*)
-QUERY([Contact]; | ;[Contact]携帯番号=$q)
+  QUERY([Contact];[Contact]電話番号=$q;*)
+  QUERY([Contact]; | ;[Contact]携帯番号=$q)
 
-  //メール
-: ($isEmail)
+   //メール
+ : ($isEmail)
 
-QUERY([Contact];[Contact]メール=$q)
+  QUERY([Contact];[Contact]メール=$q)
 
-  //郵便番号
-: ($isPost)
+   //郵便番号
+ : ($isPost)
 
-QUERY([Contact];[Contact]郵便番号=$q)
+  QUERY([Contact];[Contact]郵便番号=$q)
 
-: ($isKana)
+ : ($isKana)
 
-Case of 
-: (Length($q)>2)
+  Case of 
+  : (Length($q)>2)
 
-  //ふつうの条件
-$criteria0:="@"+$q+"@"
+     //ふつうの条件
+   $criteria0:="@"+$q+"@"
 
-  //ゆるめの条件
-$criteria1:=Substring($q;1;2)+"@"+Substring($q;Length($q))+"@"
-$criteria2:="@"+Substring($q;1;1)+"@"+Substring($q;Length($q)-1)
+     //ゆるめの条件
+   $criteria1:=Substring($q;1;2)+"@"+Substring($q;Length($q))+"@"
+   $criteria2:="@"+Substring($q;1;1)+"@"+Substring($q;Length($q)-1)
 
-QUERY BY FORMULA([Contact];\
-([Contact]名前フリガナ=$criteria1 | \
-[Contact]名前フリガナ=$criteria2 )& \
-Replace string([Contact]名前フリガナ;" ";"")=$criteria0)
+   QUERY BY FORMULA([Contact];\
+   ([Contact]名前フリガナ=$criteria1 | \
+   [Contact]名前フリガナ=$criteria2 )& \
+   Replace string([Contact]名前フリガナ;" ";"")=$criteria0)
 
-Else 
+  Else 
 
-$criteria0:="@"+$q+"@"
+   $criteria0:="@"+$q+"@"
 
-QUERY([Contact];[Contact]名前フリガナ=$criteria0)
+   QUERY([Contact];[Contact]名前フリガナ=$criteria0)
 
-End case 
+  End case 
 
-Else 
+ Else 
 
-Case of 
-: (Length($q)>1)
+  Case of 
+  : (Length($q)>1)
 
-  //ふつうの条件
-$criteria0:="@"+$q+"@"
+     //ふつうの条件
+   $criteria0:="@"+$q+"@"
 
-GET TEXT KEYWORDS($q;$words)
+   GET TEXT KEYWORDS($q;$words)
 
-  //ゆるめの条件
-$criteria1:="@"
-For ($i;1;Size of array($words))
-$criteria1:=$criteria1+$words{$i}+"@"
-End for 
+     //ゆるめの条件
+   $criteria1:="@"
+   For ($i;1;Size of array($words))
+     $criteria1:=$criteria1+$words{$i}+"@"
+   End for 
 
-QUERY BY FORMULA([Contact];\
-[Contact]名前=$criteria1 & \
-Replace string([Contact]名前;" ";"")=$criteria0)
+   QUERY BY FORMULA([Contact];\
+   [Contact]名前=$criteria1 & \
+   Replace string([Contact]名前;" ";"")=$criteria0)
 
-Else 
+  Else 
 
-$criteria0:="@"+$q+"@"
+   $criteria0:="@"+$q+"@"
 
-QUERY([Contact];[Contact]名前=$criteria0)
+   QUERY([Contact];[Contact]名前=$criteria0)
 
-End case 
+  End case 
 
-End case 
+ End case 
 
 DESCRIBE QUERY EXECUTION(False)
 
@@ -370,16 +370,16 @@ $event:=Form event
 Case of 
 : ($event=On Selection Change)
 
-LISTBOX GET CELL POSITION(*;OBJECT Get name(Object current);$col;$row)
-LISTBOX GET TABLE SOURCE(*;OBJECT Get name(Object current);$number;$name;$set)
+ LISTBOX GET CELL POSITION(*;OBJECT Get name(Object current);$col;$row)
+ LISTBOX GET TABLE SOURCE(*;OBJECT Get name(Object current);$number;$name;$set)
 
-If ($row#0)
-GOTO SELECTED RECORD(Table($number)->;$row)
-Else 
-UNLOAD RECORD(Table($number)->)
-End if 
+ If ($row#0)
+  GOTO SELECTED RECORD(Table($number)->;$row)
+ Else 
+  UNLOAD RECORD(Table($number)->)
+ End if 
 
-OBJECT SET ENABLED(*;"Contact.Field.@";Is record loaded(Table($number)->))
+ OBJECT SET ENABLED(*;"Contact.Field.@";Is record loaded(Table($number)->))
 
 End case 
 ```
@@ -400,17 +400,17 @@ Case of
 $source:=OBJECT Get data source(*;OBJECT Get name(Object with focus))
 
 If (Not(Nil($source)))
-If (Not(Is a variable($source)))
-$table:=Table(Table($source))
-If (Not(Nil($table)))
-If (Is record loaded($table->))
-If (Modified record($table->))
-SAVE RECORD($table->)
-REDRAW(OBJECT Get pointer(Object named;"Contact.List")->)
-End if 
-End if 
-End if 
-End if 
+ If (Not(Is a variable($source)))
+  $table:=Table(Table($source))
+  If (Not(Nil($table)))
+   If (Is record loaded($table->))
+    If (Modified record($table->))
+     SAVE RECORD($table->)
+     REDRAW(OBJECT Get pointer(Object named;"Contact.List")->)
+    End if 
+   End if 
+  End if 
+ End if 
 End if 
 
 End case 
@@ -488,28 +488,28 @@ $fieldTypes{3}:="VARCHAR(4)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
-If ($i#1)
-$sql:=$sql+",\r"
-End if 
-$sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
+ If ($i#1)
+  $sql:=$sql+",\r"
+ End if 
+ $sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
 End for 
 $sql:=$sql+"\r);"
 
 C_LONGINT($tableId)
 
 Begin SQL
-EXECUTE IMMEDIATE :$sql;
-SELECT TABLE_ID 
-FROM _USER_TABLES
-WHERE TABLE_NAME LIKE :$tableName
-LIMIT 1
-INTO :$tableId;
+ EXECUTE IMMEDIATE :$sql;
+ SELECT TABLE_ID 
+ FROM _USER_TABLES
+ WHERE TABLE_NAME LIKE :$tableName
+ LIMIT 1
+ INTO :$tableId;
 End SQL
 
 $sql:="ALTER TABLE ["+$tableName+"] MODIFY ["+$fieldNames{1}+"] ENABLE AUTO_INCREMENT"
 
 Begin SQL
-EXECUTE IMMEDIATE :$sql;
+ EXECUTE IMMEDIATE :$sql;
 End SQL
 ```
 
@@ -533,29 +533,29 @@ $fieldTypes{4}:="VARCHAR(10)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
-If ($i#1)
-$sql:=$sql+",\r"
-End if 
-$sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
+ If ($i#1)
+  $sql:=$sql+",\r"
+ End if 
+ $sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
 End for 
 $sql:=$sql+"\r);"
 
 C_LONGINT($tableId)
 
 Begin SQL
-EXECUTE IMMEDIATE :$sql;
-SELECT TABLE_ID 
-FROM _USER_TABLES
-WHERE TABLE_NAME LIKE :$tableName
-LIMIT 1
-INTO :$tableId;
+ EXECUTE IMMEDIATE :$sql;
+ SELECT TABLE_ID 
+ FROM _USER_TABLES
+ WHERE TABLE_NAME LIKE :$tableName
+ LIMIT 1
+ INTO :$tableId;
 End SQL
 
 $sql:="ALTER TABLE ["+$tableName+"] MODIFY ["+$fieldNames{1}+"] ENABLE AUTO_INCREMENT;\r"
 $sql:=$sql+"CREATE INDEX ["+$tableName+"."+$fieldNames{3}+"] ON ["+$tableName+"] (["+$fieldNames{3}+"]);"
 
 Begin SQL
-EXECUTE IMMEDIATE :$sql;
+ EXECUTE IMMEDIATE :$sql;
 End SQL
 ```
 
@@ -579,29 +579,29 @@ $fieldTypes{4}:="VARCHAR(18)"
 
 $sql:="CREATE TABLE IF NOT EXISTS ["+$tableName+"]\r("
 For ($i;1;Size of array($fieldNames))
-If ($i#1)
-$sql:=$sql+",\r"
-End if 
-$sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
+ If ($i#1)
+  $sql:=$sql+",\r"
+ End if 
+ $sql:=$sql+"["+$fieldNames{$i}+"] "+$fieldTypes{$i}
 End for 
 $sql:=$sql+"\r);"
 
 C_LONGINT($tableId)
 
 Begin SQL
-EXECUTE IMMEDIATE :$sql;
-SELECT TABLE_ID 
-FROM _USER_TABLES
-WHERE TABLE_NAME LIKE :$tableName
-LIMIT 1
-INTO :$tableId;
+ EXECUTE IMMEDIATE :$sql;
+ SELECT TABLE_ID 
+ FROM _USER_TABLES
+ WHERE TABLE_NAME LIKE :$tableName
+ LIMIT 1
+ INTO :$tableId;
 End SQL
 
 $sql:="ALTER TABLE ["+$tableName+"] MODIFY ["+$fieldNames{1}+"] ENABLE AUTO_INCREMENT;\r"
 $sql:=$sql+"CREATE INDEX ["+$tableName+"."+$fieldNames{3}+"] ON ["+$tableName+"] (["+$fieldNames{3}+"]);"
 
 Begin SQL
-EXECUTE IMMEDIATE :$sql;
+ EXECUTE IMMEDIATE :$sql;
 End SQL
 ```
 
@@ -614,47 +614,47 @@ ALL RECORDS([位置参照情報Ｂ])
 
 For ($i;1;Records in selection([位置参照情報Ｂ]))
 
-QUERY([都道府県];[都道府県]都道府県コード=[位置参照情報Ｂ]都道府県コード)
+ QUERY([都道府県];[都道府県]都道府県コード=[位置参照情報Ｂ]都道府県コード)
 
-If (Not(Is record loaded([都道府県])))
-CREATE RECORD([都道府県])
-[都道府県]都道府県コード:=[位置参照情報Ｂ]都道府県コード
-[都道府県]都道府県名:=[位置参照情報Ｂ]都道府県名
-SAVE RECORD([都道府県])
-End if 
+ If (Not(Is record loaded([都道府県])))
+  CREATE RECORD([都道府県])
+  [都道府県]都道府県コード:=[位置参照情報Ｂ]都道府県コード
+  [都道府県]都道府県名:=[位置参照情報Ｂ]都道府県名
+  SAVE RECORD([都道府県])
+ End if 
 
-QUERY([市区町村];[市区町村]市区町村コード=[位置参照情報Ｂ]市区町村コード)
+ QUERY([市区町村];[市区町村]市区町村コード=[位置参照情報Ｂ]市区町村コード)
 
-If (Not(Is record loaded([市区町村])))
-CREATE RECORD([市区町村])
-[市区町村]都道府県:=[都道府県]ID
-[市区町村]市区町村コード:=[位置参照情報Ｂ]市区町村コード
-[市区町村]市区町村名:=[位置参照情報Ｂ]市区町村名
-SAVE RECORD([市区町村])
-End if 
+ If (Not(Is record loaded([市区町村])))
+  CREATE RECORD([市区町村])
+  [市区町村]都道府県:=[都道府県]ID
+  [市区町村]市区町村コード:=[位置参照情報Ｂ]市区町村コード
+  [市区町村]市区町村名:=[位置参照情報Ｂ]市区町村名
+  SAVE RECORD([市区町村])
+ End if 
 
-QUERY([大字町丁目];[大字町丁目]大字町丁目コード=[位置参照情報Ｂ]大字町丁目コード)
+ QUERY([大字町丁目];[大字町丁目]大字町丁目コード=[位置参照情報Ｂ]大字町丁目コード)
 
-If (Not(Is record loaded([大字町丁目])))
-CREATE RECORD([大字町丁目])
-[大字町丁目]市区町村:=[市区町村]ID
-[大字町丁目]大字町丁目コード:=[位置参照情報Ｂ]大字町丁目コード
-[大字町丁目]大字町丁目名:=[位置参照情報Ｂ]大字町丁目名
-SAVE RECORD([大字町丁目])
-End if 
+ If (Not(Is record loaded([大字町丁目])))
+  CREATE RECORD([大字町丁目])
+  [大字町丁目]市区町村:=[市区町村]ID
+  [大字町丁目]大字町丁目コード:=[位置参照情報Ｂ]大字町丁目コード
+  [大字町丁目]大字町丁目名:=[位置参照情報Ｂ]大字町丁目名
+  SAVE RECORD([大字町丁目])
+ End if 
 
-[位置参照情報Ｂ]大字町丁目:=[大字町丁目]ID
-[位置参照情報Ｂ]住所:=[位置参照情報Ｂ]都道府県名+[位置参照情報Ｂ]市区町村名+[位置参照情報Ｂ]大字町丁目名
+ [位置参照情報Ｂ]大字町丁目:=[大字町丁目]ID
+ [位置参照情報Ｂ]住所:=[位置参照情報Ｂ]都道府県名+[位置参照情報Ｂ]市区町村名+[位置参照情報Ｂ]大字町丁目名
 
-[位置参照情報Ｂ]都道府県コード:=""
-[位置参照情報Ｂ]都道府県名:=""
-[位置参照情報Ｂ]市区町村コード:=""
-[位置参照情報Ｂ]市区町村名:=""
-[位置参照情報Ｂ]大字町丁目コード:=""
-[位置参照情報Ｂ]大字町丁目名:=""
+ [位置参照情報Ｂ]都道府県コード:=""
+ [位置参照情報Ｂ]都道府県名:=""
+ [位置参照情報Ｂ]市区町村コード:=""
+ [位置参照情報Ｂ]市区町村名:=""
+ [位置参照情報Ｂ]大字町丁目コード:=""
+ [位置参照情報Ｂ]大字町丁目名:=""
 
-SAVE RECORD([位置参照情報Ｂ])
-NEXT RECORD([位置参照情報Ｂ])
+ SAVE RECORD([位置参照情報Ｂ])
+ NEXT RECORD([位置参照情報Ｂ])
 
 End for 
 
