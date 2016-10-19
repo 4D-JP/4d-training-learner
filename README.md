@@ -191,6 +191,8 @@ End case
 GOTO OBJECT(*;OBJECT Get name(Object current))
 
 OBJECT SET ENABLED(*;"Contact.Field.@";Is record loaded([Contact]))
+
+LISTBOX SELECT ROW(*;"Contact.List";Selected record number([Contact]);Listbox replace selection)
 ```
 
 ---
@@ -388,6 +390,20 @@ End case
 ```
 
 ---
+
+* ラベルの代わりにプレースホルダーを設定する
+
+```
+Case of 
+ : ($event=On Load)
+
+ FORM GET OBJECTS($names)
+ For ($i;1;Size of array($names))
+  If ($names{$i}="Contact.Field.@")
+   OBJECT SET PLACEHOLDER(*;$names{$i};Replace string($names{$i};"Contact.Field.";"";*))
+  End if 
+ End for 
+```
 
 レコード更新
 
